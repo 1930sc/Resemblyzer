@@ -1,14 +1,29 @@
 Resemblyzer allows you to derive a **high-level representation of a voice** through a deep learning model (referred to as the voice encoder). Given an audio file of speech, it creates a summary vector of 256 values (an embedding, often shortened to "embed" in this repo) that summarizes the characteristics of the voice spoken. 
 
+N.B.: this repo holds 100mb of audio data for demonstration purpose. To get [the package](https://pypi.org/project/Resemblyzer/) alone, run `pip install resemblyzer` (python 3.5+ is required).
+
 ## Demos
-[**Speaker diarization**](https://github.com/resemble-ai/Resemblyzer/blob/master/demo02_diarization.py): recognize who is talking when with only a few seconds of reference audio per speaker:  
+**Speaker diarization**: [\[Demo 02\]](https://github.com/resemble-ai/Resemblyzer/blob/master/demo02_diarization.py) recognize who is talking when with only a few seconds of reference audio per speaker:  
 *(click the image for a video)*
 
 [![demo_02](https://i.imgur.com/2MpNauG.png)](https://streamable.com/uef39)
 
-[**Cross-similarity**](https://github.com/resemble-ai/Resemblyzer/blob/master/demo01_similarity.py): comparing 10 utterances from 10 speakers against 10 other utterances from the same speakers.
+**Fake speech detection**: [\[Demo 05\]](https://github.com/resemble-ai/Resemblyzer/blob/master/demo05_fake_speech_detection.py) modest detection of fake speech by comparing the similarity of 12 unknown utterances (6 real ones, 6 fakes) against ground truth reference audio. Scores above the dashed line are predicted as real, so the model makes one error here.
+
+![demo_05](plots/fake_speech_detection.png?raw=true)
+
+For reference, [this](https://www.youtube.com/watch?v=Ho9h0ouemWQ) is the fake video that achieved a high score.
+
+**Visualizing the manifold**:  
+[\[Demo 03 - left\]](https://github.com/resemble-ai/Resemblyzer/blob/master/demo03_projection.py) projecting the embeddings of 100 utterances (10 each from 10 speakers) in 2D space. The utterances from the same speakers form a tight cluster. With a trivial clustering algorithm, the speaker verification error rate for this example (with data unseen in training) would be 0%.  
+[\[Demo 04 - right\]](https://github.com/resemble-ai/Resemblyzer/blob/master/demo04_clustering.py) same as demo 03 but with 251 embeddings all from distinct speakers, highlighting that the model has learned on its own to identify the sex of the speaker.
+
+![demo_03_04](plots/all_clustering.png?raw=true)
+
+**Cross-similarity**: [\[Demo 01\]](https://github.com/resemble-ai/Resemblyzer/blob/master/demo01_similarity.py) comparing 10 utterances from 10 speakers against 10 other utterances from the same speakers.
 
 ![demo_01](plots/sim_matrix_1.png?raw=true)
+
 
 
 ## What can I do with this package?
@@ -43,9 +58,6 @@ print(embed)
 ```
 
 I highly suggest giving a peek to the demos to understand how similarity is computed and to see practical usages of the voice encoder.
-
-## Installation
-`pip install resemblyzer`, python 3.5+ is required.
 
 ## Additional info
 Resemblyzer emerged as a side project of the [Real-Time Voice Cloning](https://github.com/CorentinJ/Real-Time-Voice-Cloning) repository. The pretrained model that comes with Resemblyzer is interchangeable with models trained in that repository, so feel free to finetune a model on new data and possibly new languages! The paper from which the voice encoder was implemented is [Generalized End-To-End Loss for Speaker Verification](https://arxiv.org/pdf/1710.10467.pdf) (in which it is called the *speaker* encoder).

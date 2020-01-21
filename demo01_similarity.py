@@ -1,5 +1,5 @@
-from demo_utils import *
 from resemblyzer import preprocess_wav, VoiceEncoder
+from demo_utils import *
 from itertools import groupby
 from pathlib import Path
 from tqdm import tqdm
@@ -9,9 +9,12 @@ import numpy as np
 
 # The demos are ordered so as to make the explanations in the comments consistent. If you only 
 # care about running the code, then you don't have to follow that order.
+# DEMO 01: we'll show how to compare speech segments (=utterances) between them to get a metric  
+# on how similar their voices sound. We expect utterances from the same speaker to have a high 
+# similarity, and those from distinct speakers to have a lower one. 
 
 
-# The neural network will automatically use CUDA if it's available on your machine, otherwise it 
+# The neural network will automatically use CUDA if it'speaker available on your machine, otherwise it 
 # will use the CPU. You can enforce a device of your choice by passing its name as argument to the 
 # constructor. The model might take a few seconds to load with CUDA, but it then executes very 
 # quickly.

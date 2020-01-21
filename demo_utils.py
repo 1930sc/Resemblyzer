@@ -3,19 +3,39 @@ from matplotlib.animation import FuncAnimation
 from resemblyzer import sampling_rate
 from matplotlib import cm
 from time import sleep, perf_counter as timer
+from umap import UMAP
 from sys import stderr
 import matplotlib.pyplot as plt
-import sounddevice as sd
 import numpy as np
 
 _default_colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+_my_colors = np.array([
+    [0, 127, 70],
+    [255, 0, 0],
+    [255, 217, 38],
+    [0, 135, 255],
+    [165, 0, 165],
+    [255, 167, 255],
+    [97, 142, 151],
+    [0, 255, 255],
+    [255, 96, 38],
+    [142, 76, 0],
+    [33, 0, 127],
+    [0, 0, 0],
+    [183, 183, 183],
+    [76, 255, 0],
+], dtype=np.float) / 255 
 
 
 def play_wav(wav, blocking=True):
-    # Small bug with sounddevice.play: the audio is cut 0.5 second too early. We pad it to make up 
-    # for that
-    wav = np.concatenate((wav, np.zeros(sampling_rate // 2)))
-    sd.play(wav, sampling_rate, blocking=blocking)
+    try:
+        import sounddevice as sd
+        # Small bug with sounddevice.play: the audio is cut 0.5 second too early. We pad it to 
+        # make up for that
+        wav = np.concatenate((wav, np.zeros(sampling_rate // 2)))
+        sd.play(wav, sampling_rate, blocking=blocking)
+    except Exception as e:
+        print("Failed to play audio: %s" % repr(e))
 
 
 def plot_similarity_matrix(matrix, labels_a=None, labels_b=None, ax: plt.Axes=None, title=""):
@@ -66,6 +86,35 @@ def plot_histograms(all_samples, ax=None, names=None, title=""):
     
     return ax
 
+
+def plot_projections(embeds, speakers, ax=None, colors=None, markers=None, legend=True, 
+                     title="", **kwargs):
+    if ax is None:
+        _, ax = plt.subplots(figsize=(6, 6))
+        
+    # Compute the 2D projections. You could also project to another number of dimensions (e.g. 
+    # for a 3D plot) or use a different different dimensionality reduction like PCA or TSNE.
+    reducer = UMAP(**kwargs)
+    projs = reducer.fit_transform(embeds)
+    
+    # Draw the projections
+    speakers = np.array(speakers)
+    colors = colors or _my_colors
+    for i, speaker in enumerate(np.unique(speakers)):
+        speaker_projs = projs[speakers == speaker]
+        marker = "o" if markers is None else markers[i]
+        label = speaker if legend else None
+        ax.scatter(*speaker_projs.T, c=[colors[i]], marker=marker, label=label)
+
+    if legend:
+        ax.legend(title="Speakers", ncol=2)
+    ax.set_title(title)
+    ax.set_xticks([])
+    ax.set_yticks([])
+    ax.set_aspect("equal")
+    
+    return projs
+    
 
 def interactive_diarization(similarity_dict, wav, wav_splits, x_crop=5, show_time=False):
     fig, ax = plt.subplots()
